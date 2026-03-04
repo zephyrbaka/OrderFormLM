@@ -1,0 +1,510 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LM Order Form - Live Mode</title>
+    <script src="https://cdn.tailwindcss.com  "></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css  " rel="stylesheet">
+    <style>
+        @import url('https://fontsource.org/noto-sans-sc/400.css');
+        @import url('https://fontsource.org/noto-sans-sc/700.css');
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #550000;
+        }
+        .card {
+            background: rgb(0, 4, 27);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+        .input-group:focus-within {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .status-badge {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        .log-entry {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-8 px-4 sm:px-6">
+
+    <!-- Header -->
+    <header class="w-full max-w-4xl mb-6 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-white -800 flex items-center gap-2">
+                <i class="ri-terminal-box-line text-red-600"></i>
+                LM Order Form
+            </h1>
+            <p class="text-white -500 text-sm mt-1">Slot Live Transaction System</p>
+        </div>
+        <div class="flex gap-3">
+            <div id="lockStatus" class="px-4 py-2 rounded-full bg-green-100 text-green-700 font-bold text-sm flex items-center gap-2 border border-green-200">
+                <i class="ri-unlock-line"></i> UNLOCKED
+            </div>
+            <div class="px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-bold text-sm border border-blue-200">
+                MYT: <span id="clock">--:--</span>
+            </div>
+            <div id="liveSalesBox" class="px-4 py-2 rounded-full bg-yellow-100 text-yellow-800 font-bold text-sm border border-yellow-200 flex items-center gap-2">
+                <i class="ri-money-dollar-circle-line"></i>
+                LIVE: <span id="liveSales">RM0.00</span>
+            </div>
+            <button onclick="gotoLogout()" class="px-4 py-2 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-sm flex items-center gap-2">
+                <i class="ri-logout-box-line"></i> LOGOUT
+            </button>
+        </div>
+    </header>
+
+    <main class="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left Column: Inputs & Controls -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Input Panel -->
+            <div class="card p-6 border-l-4 border-red-500">
+                <h2 class="text-lg font-bold text-white -700 mb-4 flex items-center gap-2">
+                    <i> </i>Order Form
+                </h2>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <!-- Mega Input -->
+                    <div class="input-group bg-gray-50 p-3 rounded-lg border border-gray-200 transition-all">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Mega 美高 (M)</label>
+                        <div class="flex items-center gap-2">
+                            <span class="text-gray-400 font-bold">RM</span>
+                            <input type="number" id="inputM" placeholder="0" class="w-full bg-transparent text-xl font-bold text-gray-800 focus:outline-none" onkeydown="handleEnter(event, 'M')">
+                        </div>
+                    </div>
+
+                    <!-- Kiss Input -->
+                    <div class="input-group bg-gray-50 p-3 rounded-lg border border-gray-200 transition-all">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Kiss 亲亲 (K)</label>
+                        <div class="flex items-center gap-2">
+                            <span class="text-gray-400 font-bold">RM</span>
+                            <input type="number" id="inputK" placeholder="0" class="w-full bg-transparent text-xl font-bold text-gray-800 focus:outline-none" onkeydown="handleEnter(event, 'K')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="submitTransaction('M')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
+                        <span>ADD MEGA</span>
+                    </button>
+                    <button onclick="submitTransaction('K')" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
+                        <span>ADD KISS</span>
+                    </button>
+                </div>
+                
+                <!-- Adjustment / Negative Input -->
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <div class="flex gap-2">
+                        <input type="number" id="inputAdj" placeholder="Amount for adjustment (e.g. -400)" class="flex-1 bg-white border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-gray-400 outline-none">
+                        <select id="selectAdjType" class="bg-white border border-gray-300 rounded px-3 py-2 text-sm outline-none">
+                            <option value="M">Adjust M</option>
+                            <option value="K">Adjust K</option>
+                        </select>
+                        <button onclick="submitAdjustment()" class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded text-sm font-bold">
+                            ADJUST
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction Log -->
+            <div class="card p-6 h-96 flex flex-col">
+                <h2 class="text-lg font-bold text-gray-700 mb-4 flex justify-between items-center">
+                    <span><i class="ri-history-line"></i> Transaction Log</span>
+                    <button onclick="clearLog()" class="text-xs text-red-500 hover:underline">Clear History</button>
+                </h2>
+                <div id="logContainer" class="flex-1 overflow-y-auto space-y-2 pr-2">
+                    <!-- Logs will appear here -->
+                    <div class="text-center text-gray-400 py-10 text-sm">No transactions yet</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Live Stats & Settlement -->
+        <div class="space-y-6">
+            
+            <!-- Live Totals -->
+            <div class="card p-6 bg-gray-900 text-white relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <i class="ri-bar-chart-box-line text-9xl"></i>
+                </div>
+                <h3 class="text-gray-400 text-sm font-bold uppercase tracking-wider mb-4">Live Dashboard</h3>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between items-end border-b border-gray-700 pb-2">
+                        <span class="text-gray-400">Mega (M)</span>
+                        <span class="text-xl font-mono font-bold text-red-400" id="dispM">RM0</span>
+                    </div>
+                    <div class="flex justify-between items-end border-b border-gray-700 pb-2">
+                        <span class="text-gray-400">Kiss (K)</span>
+                        <span class="text-xl font-mono font-bold text-pink-400" id="dispK">RM0</span>
+                    </div>
+                    <div class="flex justify-between items-end pt-2">
+                        <span class="text-white font-bold text-lg">TOTAL GS</span>
+                        <span class="text-3xl font-mono font-bold text-white" id="dispTotal">RM0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Split Calculation -->
+            <div class="card p-6 border-t-4 border-yellow-500">
+                <h3 class="text-white -800 font-bold mb-4 flex items-center gap-2">
+                    <i class="ri-pie-chart-2-line text-yellow-500"></i> Split Calculation (75/25)
+                </h3>
+                
+                <div class="space-y-4">
+                    <!-- Owner -->
+                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-yellow-800 font-bold text-sm">🧧 老板 OWN (75%)</span>
+                            <i class="ri-user-star-line text-yellow-600"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-yellow-700" id="dispOwn">RM0.00</div>
+                    </div>
+
+                    <!-- Agent -->
+                    <div class="bg-red-50 p-4 rounded-lg border border-red-100 relative">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-red-800 font-bold text-sm">🟥 代理 AGT (25%)</span>
+                            <i class="ri-hand-coin-line text-red-600"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-red-700" id="dispAgt">RM0.00</div>
+                        
+                        <!-- Payment Status Toggle -->
+                        <div class="mt-3 pt-3 border-t border-red-200 flex justify-between items-center">
+                            <span class="text-xs text-red-600 font-bold uppercase">Status</span>
+                            <button id="btnPay" onclick="togglePayment()" class="px-3 py-1 rounded text-xs font-bold bg-gray-200 text-gray-600 hover:bg-red-100 hover:text-red-600 transition-colors">
+                                NOT PAID
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="settleCycle()" class="col-span-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-green-200 transition-all flex justify-center items-center gap-2">
+                    <i class="ri-file-list-3-line"></i> SETTLE & CLOSE (OK)
+                </button>
+                <button onclick="resetSystem()" class="col-span-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 rounded-lg text-sm transition-colors">
+                    <i class="ri-refresh-line"></i> Reset Cycle
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal for Settlement -->
+    <div id="settleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl transform transition-all scale-100">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="ri-check-double-line text-3xl text-green-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800">Cycle Closed</h3>
+                <p class="text-gray-500">Final Settlement Report</p>
+            </div>
+            
+            <div class="bg-gray-50 rounded-lg p-4 mb-6 space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Gross Sales:</span>
+                    <span class="font-bold" id="modalGS">RM0</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Owner Share:</span>
+                    <span class="font-bold text-yellow-600" id="modalOwn">RM0</span>
+                </div>
+                <div class="flex justify-between border-t border-gray-200 pt-2 mt-2">
+                    <span class="text-gray-600">Agent Share:</span>
+                    <span class="font-bold text-red-600" id="modalAgt">RM0</span>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="closeModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 rounded-lg">Close</button>
+                <button onclick="finalizeAndReset()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg">New Cycle</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        // State
+        let state = {
+            m: 0,
+            k: 0,
+            isPaid: false,
+            isLocked: false,
+            history: []
+        };
+
+        // Constants
+        const OWNER_SHARE = 0.75;
+        const AGENT_SHARE = 0.25;
+
+         // Save to localStorage
+        function saveState() {
+        localStorage.setItem("lmOrderState", JSON.stringify(state));
+        }
+
+        // Load from localStorage
+        function loadState() {
+        const saved = localStorage.getItem("lmOrderState");
+        if (saved) {
+        state = JSON.parse(saved);
+        }
+        }
+        function renderLog() {
+        const container = document.getElementById('logContainer');
+
+        if (state.history.length === 0) {
+        container.innerHTML = '<div class="text-center text-gray-400 py-10 text-sm">No transactions yet</div>';
+        return;
+        }
+
+        container.innerHTML = '';
+
+        state.history.slice().reverse().forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'log-entry flex justify-between items-center p-3 bg-white border border-gray-100 rounded shadow-sm';
+
+        const colorClass = item.cmd.includes('+') ? 'text-green-600' : 'text-red-500';
+        const icon = item.cmd.includes('+') ? 'ri-add-circle-line' : 'ri-subtract-circle-line';
+
+        div.innerHTML = `
+            <div class="flex items-center gap-3">
+                <i class="${icon} ${colorClass} text-lg"></i>
+                <span class="font-mono font-bold text-gray-700">${item.cmd}</span>
+            </div>
+            <span class="text-xs text-gray-400">${item.time}</span>
+        `;
+
+        container.appendChild(div);
+        });
+        }
+
+        // Init
+        loadState();
+        updateClock();
+        setInterval(updateClock, 1000);
+        render();
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-GB', { hour12: false });
+        }
+
+        function formatCurrency(amount) {
+            return 'RM' + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function handleEnter(e, type) {
+            if (e.key === 'Enter') {
+                submitTransaction(type);
+            }
+        }
+
+        function submitTransaction(type) {
+            if (state.isLocked) {
+                alert("System is LOCKED. Please start a new cycle.");
+                return;
+            }
+
+            const inputId = type === 'M' ? 'inputM' : 'inputK';
+            const inputEl = document.getElementById(inputId);
+            const val = parseFloat(inputEl.value);
+
+            if (isNaN(val) || val === 0) return;
+
+            // Update State
+            if (type === 'M') state.m += val;
+            if (type === 'K') state.k += val;
+
+            // Log
+            const sign = val > 0 ? '+' : '';
+            const cmd = `${type}${sign}${val}`;
+            addToLog(cmd, val > 0 ? 'add' : 'sub');
+
+            // Reset Input
+            inputEl.value = '';
+            inputEl.focus();
+
+            render();
+        }
+
+        function submitAdjustment() {
+            if (state.isLocked) return;
+
+            const inputEl = document.getElementById('inputAdj');
+            const typeEl = document.getElementById('selectAdjType');
+            const val = parseFloat(inputEl.value);
+            const type = typeEl.value;
+
+            if (isNaN(val) || val === 0) return;
+
+            // Apply adjustment
+            if (type === 'M') state.m += val;
+            if (type === 'K') state.k += val;
+
+            // Log
+            const cmd = `-${type}${Math.abs(val)}`; // Force display as negative adjustment logic visually
+            addToLog(cmd, 'sub');
+
+            inputEl.value = '';
+            render();
+        }
+
+        function addToLog(cmd, type) {
+            const container = document.getElementById('logContainer');
+            if (container.querySelector('.text-center')) {
+                container.innerHTML = '';
+            }
+
+            const div = document.createElement('div');
+            div.className = 'log-entry flex justify-between items-center p-3 bg-white border border-gray-100 rounded shadow-sm';
+            
+            const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+            const colorClass = type === 'add' ? 'text-green-600' : 'text-red-500';
+            const icon = type === 'add' ? 'ri-add-circle-line' : 'ri-subtract-circle-line';
+
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <i class="${icon} ${colorClass} text-lg"></i>
+                    <span class="font-mono font-bold text-gray-700">${cmd}</span>
+                </div>
+                <span class="text-xs text-gray-400">${time}</span>
+            `;
+            
+            container.prepend(div);
+            state.history.push({ cmd, time });
+        }
+
+        function clearLog() {
+            document.getElementById('logContainer').innerHTML = '<div class="text-center text-gray-400 py-10 text-sm">No transactions yet</div>';
+            state.history = [];
+        }
+
+        function togglePayment() {
+            state.isPaid = !state.isPaid;
+            render();
+        }
+
+        function settleCycle() {
+            if (state.m === 0 && state.k === 0) {
+                alert("No data to settle.");
+                return;
+            }
+
+            // Populate Modal
+            const total = state.m + state.k;
+            const own = total * OWNER_SHARE;
+            const agt = total * AGENT_SHARE;
+
+            document.getElementById('modalGS').innerText = formatCurrency(total);
+            document.getElementById('modalOwn').innerText = formatCurrency(own);
+            document.getElementById('modalAgt').innerText = formatCurrency(agt);
+
+            document.getElementById('settleModal').classList.remove('hidden');
+            document.getElementById('settleModal').classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('settleModal').classList.add('hidden');
+            document.getElementById('settleModal').classList.remove('flex');
+        }
+
+        function finalizeAndReset() {
+            closeModal();
+            resetSystem();
+        }
+
+        function gotoLogout() {
+                window.location.href = "logout.html";
+        }
+        
+
+        function resetSystem() {
+            state.m = 0;
+            state.k = 0;
+            state.isPaid = false;
+            state.isLocked = false;
+            clearLog();
+            render();
+        }
+
+        function render() {
+            const total = state.m + state.k;
+            const own = total * OWNER_SHARE;
+            const agt = total * AGENT_SHARE;
+
+            // Update Dashboard
+            document.getElementById('dispM').innerText = formatCurrency(state.m);
+            document.getElementById('dispK').innerText = formatCurrency(state.k);
+            document.getElementById('dispTotal').innerText = formatCurrency(total);
+            
+
+            // Update Split
+            document.getElementById('dispOwn').innerText = formatCurrency(own);
+            document.getElementById('dispAgt').innerText = formatCurrency(agt);
+            document.getElementById('liveSales').innerText = formatCurrency(total);
+
+            // Update Payment Button
+            const btnPay = document.getElementById('btnPay');
+            if (state.isPaid) {
+                btnPay.innerText = "PAID ✓";
+                btnPay.className = "px-3 py-1 rounded text-xs font-bold bg-green-500 text-white shadow-md";
+                document.getElementById('dispAgt').parentElement.classList.add('ring-2', 'ring-green-500');
+            } else {
+                btnPay.innerText = "NOT PAID";
+                btnPay.className = "px-3 py-1 rounded text-xs font-bold bg-gray-200 text-gray-600 hover:bg-red-100 hover:text-red-600 transition-colors";
+                document.getElementById('dispAgt').parentElement.classList.remove('ring-2', 'ring-green-500');
+            }
+
+            // Update Lock Status
+            const lockBadge = document.getElementById('lockStatus');
+            if (state.isLocked) {
+                lockBadge.className = "px-4 py-2 rounded-full bg-red-100 text-red-700 font-bold text-sm flex items-center gap-2 border border-red-200";
+                lockBadge.innerHTML = '<i class="ri-lock-line"></i> LOCKED';
+            } else {
+                lockBadge.className = "px-4 py-2 rounded-full bg-green-100 text-green-700 font-bold text-sm flex items-center gap-2 border border-green-200 status-badge";
+                lockBadge.innerHTML = '<i class="ri-unlock-line"></i> UNLOCKED';
+            }
+             // 🔥 AUTO SAVE SINI
+            saveState();
+            renderLog();
+        }
+    </script>
+</body>
+</html>

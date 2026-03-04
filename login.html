@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LM Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #550000;
+        }
+
+        .card {
+            background: rgb(0, 4, 27);
+            border-radius: 12px;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center px-4">
+
+    <div class="card w-full max-w-md p-8 shadow-2xl border-t-4 border-red-600">
+
+        <!-- Title -->
+        <div class="text-center mb-6">
+            <i class="ri-shield-user-line text-5xl text-red-500"></i>
+            <h2 class="text-2xl font-bold text-white mt-3">LM Admin Login</h2>
+            <p class="text-gray-400 text-sm">Secure Access Panel</p>
+        </div>
+
+        <!-- Form -->
+        <div class="space-y-4">
+            <div>
+                <label class="text-sm text-gray-400">Username</label>
+                <input type="text" id="username"
+                    class="w-full mt-1 px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-600"
+                    placeholder="Enter username">
+            </div>
+
+            <div>
+                <label class="text-sm text-gray-400">Password</label>
+                <input type="password" id="password"
+                    class="w-full mt-1 px-3 py-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-600"
+                    placeholder="Enter password">
+            </div>
+
+            <button onclick="login()"
+                class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded font-bold transition-all">
+                <i class="ri-login-box-line"></i> Login
+            </button>
+
+            <p id="errorMsg" class="text-red-500 text-sm text-center hidden">
+                Wrong username or password
+            </p>
+        </div>
+
+        <!-- Back -->
+        <div class="text-center mt-6">
+            <a href="thumbnail.html" class="text-gray-400 text-sm hover:text-white">
+                ← Back 
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+        function login() {
+            const user = document.getElementById("username").value;
+            const pass = document.getElementById("password").value;
+
+            // Tukar ikut kau punya
+            if (user === "hezrend2604" && pass === "hexsty9886") {
+                
+
+                // Simpan session login
+                localStorage.setItem("lmLoggedIn", "true");
+
+                // Pergi dashboard
+                window.location.href = "Main.html";
+
+            } else {
+                document.getElementById("errorMsg").classList.remove("hidden");
+            }
+        }
+
+        // Tekan Enter untuk login
+        document.addEventListener("keydown", function(e){
+            if(e.key === "Enter"){
+                login();
+            }
+        });
+    </script>
+
+</body>
+</html>
